@@ -1,0 +1,22 @@
+const browser = await puppeteer.launch({
+    headless: "new",
+  });
+  const page = await browser.newPage();
+  let body = await invoiceHtml.MailSent({
+    invoiceNumber: paddedNumber,
+    invoiceDate: moment(new Date()).format("DD/MM/YYYY"),
+    userName: userData.name,
+    packageName: data.name,
+    packageDuration: data.duration,
+    netAmount: data.amount?.toFixed(2),
+    totalAmount: data.amount?.toFixed(2),
+    currencyName: data.currency,
+  });
+  await page.setContent(body);
+
+  await page.pdf({
+    path: `uploads/Invoice/Invoice-${paddedNumber}.pdf`,
+    format: "A4",
+    printBackground: true,
+  });
+  await browser.close()

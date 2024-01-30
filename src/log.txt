@@ -1,0 +1,38 @@
+const winston = require("winston");
+const { createLogger, format, transports } = require("winston");
+const responseHandler = require('../utils/responsehandler')
+const fs = require('fs');
+const MessageConstant = require('../constant/messageconstant')
+const logConfiguration = {
+  transports: new transports.File({
+    filename: "./logs/errors.log",
+    format: format.combine(
+      format.timestamp({ format: "MMM-DD-YYYY HH:mm:ss" }),
+      format.align(),
+      format.printf((info) => `${info.level}: ${info.timestamp}: ${info.message}`)
+    ),
+  }),
+};
+const logger = createLogger(logConfiguration);
+
+const tryCatchFn = (fn) => {
+  return (req, res, next) => {
+    fn(req, res, next).catch((error) => {
+      // Log the error
+      console.log(typeof error, "errorlog", error.stack);
+      responseHandler.errorResponse(
+        res,
+        400,
+        error.message || MessageConstant.SOMETHING_WRONG,
+        {error}
+      )
+      logger.error(typeof error === "Array" ? JSON.stringify(error) : error.stack);
+      next(error); 
+
+    });
+  };
+};
+
+module.exports = { tryCatchFn };
+
+
